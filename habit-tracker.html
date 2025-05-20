@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Morning Routine Tracker</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #fff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100vh;
+      color: #333;
+    }
+    #calendar {
+      width: 22%;
+      background: #f9fafb;
+      padding: 25px 20px;
+      box-sizing: border-box;
+      border-right: 1px solid #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    #calendar h3 {
+      font-weight: 700;
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+      color: #222;
+    }
+    #datePicker {
+      padding: 12px 14px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1.8px solid #ccc;
+      outline-offset: 2px;
+      transition: border-color 0.3s ease;
+      cursor: pointer;
+      background: white;
+      box-shadow: 0 2px 6px rgb(0 0 0 / 0.07);
+      user-select: none;
+    }
+    #datePicker:focus {
+      border-color: #4caf50;
+      box-shadow: 0 0 5px #4caf50;
+    }
+    #calendarSummary {
+      flex-grow: 1;
+      background: white;
+      border-radius: 12px;
+      padding: 15px 20px;
+      box-shadow: 0 3px 8px rgb(0 0 0 / 0.1);
+      overflow-y: auto;
+      font-size: 0.95rem;
+      color: #444;
+    }
+    #calendarSummary div {
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+    #calendarSummary div:last-child {
+      border-bottom: none;
+    }
+    #main {
+      flex-grow: 1;
+      padding: 30px 35px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+    #main h2 {
+      margin-bottom: 25px;
+      font-weight: 700;
+      color: #222;
+      user-select: none;
+    }
+    #inputRow {
+      display: flex;
+      margin-bottom: 20px;
+      gap: 10px;
+    }
+    input[type="text"] {
+      flex-grow: 1;
+      padding: 12px 15px;
+      font-size: 1.1rem;
+      border: 1.5px solid #ccc;
+      border-radius: 8px;
+      outline-color: #4caf50;
+      transition: border-color 0.3s ease;
+      user-select: text;
+    }
+    input[type="text"]:focus {
+      border-color: #4caf50;
+      box-shadow: 0 0 5px #4caf50;
+    }
+    #addBtn {
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      padding: 12px 22px;
+      font-size: 1.1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      flex-shrink: 0;
+    }
+    #addBtn:hover {
+      background-color: #3e8e41;
+    }
+    #taskList {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      flex-grow: 1;
+      overflow-y: auto;
+      border: 1.5px solid #ddd;
+      border-radius: 12px;
+      background: #fafafa;
+      box-shadow: inset 0 1px 4px rgb(0 0 0 / 0.06);
+      user-select: none;
+    }
+    #taskList li {
+      padding: 14px 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      user-select: none;
+      color: #333;
+    }
+    #taskList li:last-child {
+      border-bottom: none;
+    }
+    #taskList li:hover {
+      background-color: #e9f4e9;
+    }
+    #taskList li.completed {
+      background-color: #d9f0d9;
+      color: #2d662d;
+      user-select: text;
+    }
+    #taskList li .task-text {
+      flex-grow: 1;
+      margin-right: 20px;
+      outline: none;
+      cursor: text;
+      user-select: text;
+      font-size: 1.05rem;
+    }
+    #taskList li button {
+      background: transparent;
+      border: none;
+      color: #c0392b;
+      font-weight: 700;
+      font-size: 1.2rem;
+      cursor: pointer;
+      user-select: none;
+      padding: 0 6px;
+      transition: color 0.2s ease;
+    }
+    #taskList li button:hover {
+      color: #9b2a23;
+    }
+    #progressBarContainer {
+      width: 100%;
+      height: 20px;
+      background-color: #ddd;
+      border-radius: 10px;
+      margin-top: 20px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 4px rgb(0 0 0 / 0.1);
+    }
+    #progressBar {
+      height: 100%;
+      width: 0%;
+      background-color: #4caf50;
+      border-radius: 10px 0 0 10px;
+      transition: width 0.3s ease;
+    }
+    #message {
+      color: #c0392b;
+      font-weight: 600;
+      margin-top: 12px;
+      height: 22px;
+      user-select: none;
+    }
+    #quote {
+      margin-top: 30px;
+      font-style: italic;
+      color: #777;
+      font-size: 1.1rem;
+      user-select: none;
+      user-drag: none;
+    }
+    #timer {
+      width: 260px;
+      background: #f9fafb;
+      padding: 25px 20px;
+      box-sizing: border-box;
+      border-left: 1px solid #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+    }
+    #timer h3 {
+      font-weight: 700;
+      font-size: 1.3rem;
+      margin-bottom: 18px;
+      color: #222;
+    }
+    #timeInput {
+      width: 100%;
+      padding: 12px 15px;
+      font-size: 1.1rem;
+      border: 1.5px solid #ccc;
+      border-radius: 8px;
+      outline-color: #4caf50;
+      margin-bottom: 18px;
+      box-sizing: border-box;
+      user-select: text;
+    }
+    #timeInput:focus {
+      border-color: #4caf50;
+      box-shadow: 0 0 5px #4caf50;
+    }
+    #timerButtons {
+      width: 100%;
+      display: flex;
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+    #startStopTimerBtn {
+      flex-grow: 1;
+      padding: 15px 0;
+      font-size: 1.3rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background-color: #4caf50;
+      color: white;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+    #startStopTimerBtn:hover {
+      background-color: #3e8e41;
+    }
+    #resetTimerBtn {
+      flex-grow: 1;
+      padding: 15px 0;
+      font-size: 1.3rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background-color: #f44336;
+      color: white;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+    #resetTimerBtn:hover {
+      background-color: #c0392b;
+    }
+    #timeCircle {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      border: 14px solid #ddd;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2.3rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      background: conic-gradient(#ddd 0deg, #ddd 360deg);
+      user-select: none;
+      box-shadow: 0 3px 10px rgb(0 0 0 / 0.1);
+    }
+    #countdown {
+      position: relative;
+      z-index: 1;
+      user-select: none;
+    }
+    #streakBox {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #4caf50;
+      user-select: none;
+      text-align: center;
+    }
+    #calendarSummary::-webkit-scrollbar,
+    #taskList::-webkit-scrollbar {
+      width: 8px;
+    }
+    #calendarSummary::-webkit-scrollbar-thumb,
+    #taskList::-webkit-scrollbar-thumb {
+      background-color: #c1c1c1;
+      border-radius: 6px;
+    }
+    #calendarSummary::-webkit-scrollbar-track,
+    #taskList::-webkit-scrollbar-track {
+      background-color: #f1f1f1;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div id="calendar">
+    <h3>Calendar</h3>
+    <input type="date" id="datePicker" />
+    <div id="calendarSummary" aria-live="polite" aria-atomic="true"></div>
+  </div>
+
+  <div id="main">
+    <h2>Morning Routine</h2>
+    <div id="inputRow">
+      <input type="text" id="taskInput" placeholder="Add a task" aria-label="Add a task" />
+      <button id="addBtn" aria-label="Add task">Add</button>
+    </div>
+    <ul id="taskList" draggable="true" aria-live="polite" aria-relevant="additions removals" role="list"></ul>
+    <div id="progressBarContainer" aria-label="Task completion progress">
+      <div id="progressBar"></div>
+    </div>
+    <div id="message" role="alert" aria-live="assertive"></div>
+    <div id="quote"></div>
+  </div>
+
+  <div id="timer">
+    <h3>Set Timer</h3>
+    <input type="number" id="timeInput" placeholder="Minutes" min="1" aria-label="Timer duration in minutes" />
+    <div id="timerButtons">
+      <button id="startStopTimerBtn" aria-label="Start/Stop timer">Start</button>
+      <button id="resetTimerBtn" aria-label="Reset timer">Reset</button>
+    </div>
+    <div id="timeCircle"><span id="countdown">00:00</span></div>
+    <div id="streakBox" aria-live="polite">Streak: 0 days</div>
+  </div>
+
+  <script>
+    // Elements
+    const taskInput = document.getElementById('taskInput');
+    const addBtn = document.getElementById('addBtn');
+    const taskList = document.getElementById('taskList');
+    const progressBar = document.getElementById('progressBar');
+    const message = document.getElementById('message');
+    const quote = document.getElementById('quote');
+    const datePicker = document.getElementById('datePicker');
+    const calendarSummary = document.getElementById('calendarSummary');
+    const startStopTimerBtn = document.getElementById('startStopTimerBtn');
+    const resetTimerBtn = document.getElementById('resetTimerBtn');
+    const timeInput = document.getElementById('timeInput');
+    const countdown = document.getElementById('countdown');
+    const timeCircle = document.getElementById('timeCircle');
+    const streakBox = document.getElementById('streakBox');
+
+    // State
+    let tasks = [];
+    let selectedDate = '';
+    let timerDuration = 0;
+    let timerRemaining = 0;
+    let timerInterval = null;
+    let timerRunning = false;
+    let streak = 0;
+
+    // Utility
+    function formatDate(date) {
+      return date.toISOString().split('T')[0];
+    }
+
+    function loadTasksByDate(dateStr) {
+      const tasksJSON = localStorage.getItem(`tasks-${dateStr}`);
+      return tasksJSON ? JSON.parse(tasksJSON) : [];
+    }
+
+    function saveTasksByDate(dateStr, tasksArray) {
+      localStorage.setItem(`tasks-${dateStr}`, JSON.stringify(tasksArray));
+    }
+
+    function calculateProgress(tasksArray) {
+      if (tasksArray.length === 0) return 0;
+      const completedCount = tasksArray.filter(t => t.completed).length;
+      return (completedCount / tasksArray.length) * 100;
+    }
+
+    function renderCalendarProgress(dateStr) {
+     
+      calendarSummary.innerHTML = '';
+
+      for (let i = 3; i >= 1; i--) {
+        const day = new Date(dateStr);
+        day.setDate(day.getDate() - i);
+        const dayStr = formatDate(day);
+        const dayTasks = loadTasksByDate(dayStr);
+        const progress = calculateProgress(dayTasks);
+        const progressPercent = progress.toFixed(0);
+
+        const dayDiv = document.createElement('div');
+        dayDiv.setAttribute('tabindex', '0');
+        dayDiv.innerHTML = `
+          <strong>${day.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</strong>
+          <div style="background:#ddd; border-radius:8px; height:12px; margin-top:6px; overflow:hidden;">
+            <div style="width:${progressPercent}%; background:#4caf50; height:100%; border-radius:8px 0 0 8px;"></div>
+          </div>
+          <small style="color:#555;">${progressPercent}% completed</small>
+        `;
+        calendarSummary.appendChild(dayDiv);
+      }
+    }
+
+    function renderTasks() {
+      taskList.innerHTML = '';
+      tasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        li.className = task.completed ? 'completed' : '';
+        li.setAttribute('role', 'listitem');
+        li.setAttribute('tabindex', '0');
+        li.dataset.index = index;
+
+        const span = document.createElement('span');
+        span.className = 'task-text';
+        span.contentEditable = true;
+        span.spellcheck = false;
+        span.textContent = task.text;
+        span.addEventListener('blur', () => {
+          tasks[index].text = span.textContent.trim();
+          saveTasksByDate(selectedDate, tasks);
+          renderProgress();
+        });
+        span.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            span.blur();
+          }
+        });
+
+        li.appendChild(span);
+
+        const btn = document.createElement('button');
+        btn.setAttribute('aria-label', 'Delete task');
+        btn.textContent = '×';
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          tasks.splice(index, 1);
+          saveTasksByDate(selectedDate, tasks);
+          renderTasks();
+          renderProgress();
+        });
+        li.appendChild(btn);
+
+        li.addEventListener('click', () => {
+          tasks[index].completed = !tasks[index].completed;
+          saveTasksByDate(selectedDate, tasks);
+          renderTasks();
+          renderProgress();
+        });
+
+        taskList.appendChild(li);
+      });
+    }
+
+    function renderProgress() {
+      const progressPercent = calculateProgress(tasks);
+      progressBar.style.width = progressPercent + '%';
+    }
+
+    function showMessage(msg) {
+      message.textContent = msg;
+      if (msg) {
+        setTimeout(() => {
+          message.textContent = '';
+        }, 2500);
+      }
+    }
+
+    function loadQuote() {
+      const quotes = [
+        "“The secret of getting ahead is getting started.” – Mark Twain",
+        "“Your limitation—it's only your imagination.”",
+        "“Push yourself, because no one else is going to do it for you.”",
+        "“Great things never come from comfort zones.”",
+        "“Dream it. Wish it. Do it.”",
+        "“Success doesn’t just find you. You have to go out and get it.”",
+        "“Don’t stop when you’re tired. Stop when you’re done.”"
+      ];
+      const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+      quote.textContent = randomQuote;
+    }
+
+    // Timer functions
+    function updateTimerDisplay() {
+      const minutes = Math.floor(timerRemaining / 60);
+      const seconds = timerRemaining % 60;
+      countdown.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+      const percent = timerDuration ? (timerRemaining / timerDuration) * 360 : 0;
+      timeCircle.style.background = `conic-gradient(#4caf50 ${percent}deg, #ddd ${percent}deg)`;
+    }
+
+    function startTimer() {
+      if (timerRemaining <= 0) {
+        showMessage('Set a valid timer duration!');
+        return;
+      }
+      timerRunning = true;
+      startStopTimerBtn.textContent = 'Stop';
+      timerInterval = setInterval(() => {
+        if (timerRemaining > 0) {
+          timerRemaining--;
+          updateTimerDisplay();
+        } else {
+          clearInterval(timerInterval);
+          timerRunning = false;
+          startStopTimerBtn.textContent = 'Start';
+          updateTimerDisplay();
+          updateStreak();
+          showMessage('Timer finished!');
+        }
+      }, 1000);
+    }
+
+    function stopTimer() {
+      timerRunning = false;
+      startStopTimerBtn.textContent = 'Start';
+      clearInterval(timerInterval);
+    }
+
+    function resetTimer() {
+      stopTimer();
+      timerRemaining = timerDuration;
+      updateTimerDisplay();
+    }
+
+    function updateStreak() {
+      const today = formatDate(new Date());
+      const lastStreakDay = localStorage.getItem('lastStreakDay');
+      const lastStreakCount = parseInt(localStorage.getItem('streakCount'), 10) || 0;
+
+      if (lastStreakDay) {
+        const lastDate = new Date(lastStreakDay);
+        const currentDate = new Date(today);
+        const diff = Math.floor((currentDate - lastDate) / (1000 * 60 * 60 * 24));
+
+        if (diff === 1) {
+          streak = lastStreakCount + 1;
+        } else if (diff > 1) {
+          streak = 1;
+        } else {
+          streak = lastStreakCount;
+        }
+      } else {
+        streak = 1;
+      }
+      localStorage.setItem('lastStreakDay', today);
+      localStorage.setItem('streakCount', streak);
+      streakBox.textContent = `Streak: ${streak} day${streak > 1 ? 's' : ''}`;
+    }
+
+    // Events
+    addBtn.addEventListener('click', () => {
+      const val = taskInput.value.trim();
+      if (!val) {
+        showMessage('Please enter a task.');
+        return;
+      }
+      tasks.push({ text: val, completed: false });
+      saveTasksByDate(selectedDate, tasks);
+      taskInput.value = '';
+      renderTasks();
+      renderProgress();
+    });
+
+    taskInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        addBtn.click();
+      }
+    });
+
+    datePicker.addEventListener('change', () => {
+      selectedDate = datePicker.value;
+      tasks = loadTasksByDate(selectedDate);
+      renderTasks();
+      renderProgress();
+      renderCalendarProgress(selectedDate);
+    });
+
+    startStopTimerBtn.addEventListener('click', () => {
+      if (timerRunning) {
+        stopTimer();
+      } else {
+        // If timer not running, start with current input value if timerRemaining is 0
+        if (!timerRemaining) {
+          const val = parseInt(timeInput.value, 10);
+          if (!val || val < 1) {
+            showMessage('Enter a valid number of minutes.');
+            return;
+          }
+          timerDuration = val * 60;
+          timerRemaining = timerDuration;
+          updateTimerDisplay();
+        }
+        startTimer();
+      }
+    });
+
+    resetTimerBtn.addEventListener('click', () => {
+      resetTimer();
+    });
+
+    timeInput.addEventListener('input', () => {
+      const val = parseInt(timeInput.value, 10);
+      if (val && val > 0) {
+        timerDuration = val * 60;
+        timerRemaining = timerDuration;
+        updateTimerDisplay();
+      }
+    });
+
+    // Initialize
+    function init() {
+      const today = formatDate(new Date());
+      selectedDate = today;
+      datePicker.value = today;
+      tasks = loadTasksByDate(today);
+      renderTasks();
+      renderProgress();
+      renderCalendarProgress(today);
+      loadQuote();
+      updateTimerDisplay();
+      updateStreak();
+    }
+
+    init();
+  </script>
+</body>
+</html>
